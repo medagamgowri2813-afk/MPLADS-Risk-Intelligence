@@ -15,7 +15,8 @@ import MapView from "./MapView";
    API CONFIGURATION
    ========================================================= */
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL =
+  "https://mplads-risk-intelligence.onrender.com/api";
 
 /* =========================================================
    DEFAULT DATA
@@ -28,18 +29,6 @@ const DEFAULT_DASHBOARD = {
   highRisk: 0,
   criticalRisk: 0,
   anomalies: 0,
-};
-
-const DEFAULT_ALLOCATION_ANALYTICS = {
-  totalAllocation: 0,
-  totalRecords: 0,
-  uniqueMPs: 0,
-  uniqueConstituencies: 0,
-  uniqueStates: 0,
-  completeness: 0,
-  stateAnalytics: [],
-  topMPs: [],
-  topConstituencies: [],
 };
 
 /* =========================================================
@@ -378,7 +367,7 @@ function UploadData({
           0;
 
         setMessage(
-          `Allocation dataset uploaded successfully. ${rows} records are ready for allocation analytics.`
+          `Allocation dataset uploaded successfully. ${rows} records were processed.`
         );
       } else {
         setMessage(
@@ -450,7 +439,7 @@ function UploadData({
         "ERR_NETWORK"
       ) {
         setError(
-          "Cannot connect to the backend server. Make sure the server is running on port 5000."
+          "Cannot connect to the backend server. Please check the Render backend."
         );
       } else {
         setError(
@@ -602,7 +591,8 @@ function UploadData({
               }}
             >
               MP, constituency and state allocation
-              data used for fund distribution analytics.
+              data used for fund distribution
+              information.
             </p>
           </div>
         </div>
@@ -796,8 +786,8 @@ function UploadData({
               <strong>03</strong>
 
               <span>
-                Project AI risk analysis OR allocation
-                analytics
+                Project AI risk analysis OR
+                allocation data processing
               </span>
             </div>
 
@@ -864,684 +854,10 @@ function UploadData({
           AI risk flags identify projects that may
           require human verification; they do not
           independently establish fraud or wrongdoing.
-          Allocation analytics describe fund distribution
-          and are not fraud determinations.
+          Allocation data is treated separately from
+          project-level AI risk scoring.
         </p>
       </div>
-    </>
-  );
-}
-
-/* =========================================================
-   ALLOCATION ANALYTICS PAGE
-   ========================================================= */
-
-function AllocationAnalyticsPage({
-  analytics,
-  loading,
-  refreshAllocation,
-}) {
-  const data =
-    analytics ||
-    DEFAULT_ALLOCATION_ANALYTICS;
-
-  const stateData =
-    Array.isArray(
-      data.stateAnalytics
-    )
-      ? data.stateAnalytics
-      : [];
-
-  const topMPs =
-    Array.isArray(
-      data.topMPs
-    )
-      ? data.topMPs
-      : [];
-
-  const topConstituencies =
-    Array.isArray(
-      data.topConstituencies
-    )
-      ? data.topConstituencies
-      : [];
-
-  const maxStateAmount =
-    Math.max(
-      ...stateData.map(
-        (item) =>
-          Number(
-            item.totalAllocation ||
-              item.allocation ||
-              item.amount ||
-              0
-          )
-      ),
-      1
-    );
-
-  return (
-    <>
-      <header>
-        <div>
-          <p className="eyebrow">
-            MPLADS FUND DISTRIBUTION
-          </p>
-
-          <h2>
-            Allocation Analytics
-          </h2>
-
-          <p>
-            Analyze MPLADS allocation patterns across
-            MPs, constituencies and states.
-          </p>
-        </div>
-
-        <button
-          className="refresh-button"
-          onClick={refreshAllocation}
-          disabled={loading}
-        >
-          ↻ Refresh
-        </button>
-      </header>
-
-      {loading ? (
-        <div className="panel">
-          <div className="projects-loading">
-            Loading allocation analytics...
-          </div>
-        </div>
-      ) : data.totalRecords === 0 ? (
-        <>
-          <div className="panel">
-            <div className="projects-empty">
-              <div className="empty-icon">
-                💰
-              </div>
-
-              <h3>
-                No Allocation Dataset Loaded
-              </h3>
-
-              <p>
-                Upload the MPLADS allocation CSV from
-                the Upload Data page to view allocation
-                analytics.
-              </p>
-            </div>
-          </div>
-
-          <div className="dashboard-disclaimer">
-            <span>ℹ️</span>
-
-            <p>
-              Allocation analytics are separate from
-              project-level AI risk scoring.
-            </p>
-          </div>
-        </>
-      ) : (
-        <>
-          <section className="cards">
-            <KpiCard
-              icon="💰"
-              label="TOTAL ALLOCATION"
-              value={formatIndianAmount(
-                data.totalAllocation
-              )}
-              description="Total allocation represented in uploaded records"
-              type="blue"
-              progress={100}
-            />
-
-            <KpiCard
-              icon="📄"
-              label="RECORDS"
-              value={
-                data.totalRecords
-              }
-              description="Allocation records analyzed"
-              type="purple"
-              progress={100}
-            />
-
-            <KpiCard
-              icon="👤"
-              label="MPs"
-              value={
-                data.uniqueMPs
-              }
-              description="Unique MPs represented"
-              type="orange"
-              progress={100}
-            />
-
-            <KpiCard
-              icon="📍"
-              label="CONSTITUENCIES"
-              value={
-                data.uniqueConstituencies
-              }
-              description="Unique constituencies represented"
-              type="red"
-              progress={100}
-            />
-          </section>
-
-          <section className="dashboard-grid">
-            <div className="panel">
-              <div className="panel-header">
-                <div>
-                  <p className="eyebrow">
-                    STATE DISTRIBUTION
-                  </p>
-
-                  <h3>
-                    Allocation by State
-                  </h3>
-
-                  <p className="table-description">
-                    Total allocation represented by each
-                    state in the uploaded dataset.
-                  </p>
-                </div>
-
-                <div className="risk-total">
-                  <strong>
-                    {data.uniqueStates}
-                  </strong>
-
-                  <span>
-                    STATES
-                  </span>
-                </div>
-              </div>
-
-              {stateData.length === 0 ? (
-                <div className="no-results">
-                  No state-level allocation
-                  information available.
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection:
-                      "column",
-                    gap: "14px",
-                  }}
-                >
-                  {stateData
-                    .slice(0, 15)
-                    .map(
-                      (
-                        item,
-                        index
-                      ) => {
-                        const amount =
-                          Number(
-                            item.totalAllocation ||
-                              item.allocation ||
-                              item.amount ||
-                              0
-                          );
-
-                        const state =
-                          item.state ||
-                          item.State ||
-                          "Unknown";
-
-                        const percentage =
-                          data.totalAllocation >
-                          0
-                            ? (
-                                (amount /
-                                  Number(
-                                    data.totalAllocation
-                                  )) *
-                                100
-                              )
-                            : 0;
-
-                        return (
-                          <div
-                            key={`${state}-${index}`}
-                          >
-                            <div
-                              style={{
-                                display:
-                                  "flex",
-                                justifyContent:
-                                  "space-between",
-                                gap:
-                                  "12px",
-                                marginBottom:
-                                  "6px",
-                              }}
-                            >
-                              <strong
-                                style={{
-                                  fontSize:
-                                    "13px",
-                                }}
-                              >
-                                {state}
-                              </strong>
-
-                              <span
-                                style={{
-                                  fontSize:
-                                    "12px",
-                                  color:
-                                    "#64748b",
-                                }}
-                              >
-                                {formatIndianAmount(
-                                  amount
-                                )}{" "}
-                                •{" "}
-                                {percentage.toFixed(
-                                  1
-                                )}
-                                %
-                              </span>
-                            </div>
-
-                            <div
-                              style={{
-                                height:
-                                  "9px",
-                                background:
-                                  "#e5e7eb",
-                                borderRadius:
-                                  "20px",
-                                overflow:
-                                  "hidden",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  height:
-                                    "100%",
-                                  width: `${Math.max(
-                                    2,
-                                    (amount /
-                                      maxStateAmount) *
-                                      100
-                                  )}%`,
-                                  background:
-                                    "#2563eb",
-                                  borderRadius:
-                                    "20px",
-                                }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      }
-                    )}
-                </div>
-              )}
-            </div>
-
-            <div className="panel">
-              <div className="panel-header">
-                <div>
-                  <p className="eyebrow">
-                    TOP MP ALLOCATIONS
-                  </p>
-
-                  <h3>
-                    Highest Allocations
-                  </h3>
-
-                  <p className="table-description">
-                    MPs ranked by represented allocation
-                    amount.
-                  </p>
-                </div>
-              </div>
-
-              {topMPs.length === 0 ? (
-                <div className="no-results">
-                  No MP-level analytics available.
-                </div>
-              ) : (
-                <div className="table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>
-                          MP
-                        </th>
-
-                        <th>
-                          Constituency
-                        </th>
-
-                        <th>
-                          State
-                        </th>
-
-                        <th>
-                          Allocation
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {topMPs
-                        .slice(0, 10)
-                        .map(
-                          (
-                            item,
-                            index
-                          ) => (
-                            <tr
-                              key={
-                                item.mp ||
-                                item.mpName ||
-                                index
-                              }
-                            >
-                              <td>
-                                <strong>
-                                  {
-                                    item.mp ||
-                                    item.mpName ||
-                                    item["Hon'ble Members of Parliaments"] ||
-                                    "Unknown"
-                                  }
-                                </strong>
-                              </td>
-
-                              <td>
-                                {
-                                  item.constituency ||
-                                  item.Constituency ||
-                                  "—"
-                                }
-                              </td>
-
-                              <td>
-                                {
-                                  item.state ||
-                                  item.State ||
-                                  "—"
-                                }
-                              </td>
-
-                              <td>
-                                <strong>
-                                  {formatIndianAmount(
-                                    item.totalAllocation ||
-                                      item.allocation ||
-                                      item.amount ||
-                                      0
-                                  )}
-                                </strong>
-                              </td>
-                            </tr>
-                          )
-                        )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {topConstituencies.length >
-            0 && (
-            <section className="panel">
-              <div className="panel-header">
-                <div>
-                  <p className="eyebrow">
-                    CONSTITUENCY ANALYSIS
-                  </p>
-
-                  <h3>
-                    Top Constituencies
-                  </h3>
-                </div>
-              </div>
-
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>
-                        Rank
-                      </th>
-
-                      <th>
-                        Constituency
-                      </th>
-
-                      <th>
-                        State
-                      </th>
-
-                      <th>
-                        Allocation
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {topConstituencies
-                      .slice(0, 15)
-                      .map(
-                        (
-                          item,
-                          index
-                        ) => (
-                          <tr
-                            key={
-                              item.constituency ||
-                              index
-                            }
-                          >
-                            <td>
-                              <strong>
-                                #
-                                {index +
-                                  1}
-                              </strong>
-                            </td>
-
-                            <td>
-                              {
-                                item.constituency ||
-                                item.Constituency ||
-                                "Unknown"
-                              }
-                            </td>
-
-                            <td>
-                              {
-                                item.state ||
-                                item.State ||
-                                "—"
-                              }
-                            </td>
-
-                            <td>
-                              <strong>
-                                {formatIndianAmount(
-                                  item.totalAllocation ||
-                                    item.allocation ||
-                                    item.amount ||
-                                    0
-                                )}
-                              </strong>
-                            </td>
-                          </tr>
-                        )
-                      )}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-
-          <section className="dashboard-grid">
-            <div className="panel">
-              <p className="eyebrow">
-                DATA QUALITY
-              </p>
-
-              <h3>
-                Allocation Dataset Quality
-              </h3>
-
-              <div
-                className="status-list"
-                style={{
-                  marginTop:
-                    "18px",
-                }}
-              >
-                <div className="status-row">
-                  <div>
-                    <span className="status-dot online" />
-
-                    <span>
-                      Records detected
-                    </span>
-                  </div>
-
-                  <strong>
-                    {data.totalRecords}
-                  </strong>
-                </div>
-
-                <div className="status-row">
-                  <div>
-                    <span className="status-dot online" />
-
-                    <span>
-                      States identified
-                    </span>
-                  </div>
-
-                  <strong>
-                    {data.uniqueStates}
-                  </strong>
-                </div>
-
-                <div className="status-row">
-                  <div>
-                    <span className="status-dot online" />
-
-                    <span>
-                      MPs identified
-                    </span>
-                  </div>
-
-                  <strong>
-                    {data.uniqueMPs}
-                  </strong>
-                </div>
-
-                <div className="status-row">
-                  <div>
-                    <span className="status-dot online" />
-
-                    <span>
-                      Constituencies identified
-                    </span>
-                  </div>
-
-                  <strong>
-                    {data.uniqueConstituencies}
-                  </strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="panel intelligence-panel">
-              <p className="eyebrow">
-                INTERPRETATION
-              </p>
-
-              <h3>
-                What this analysis shows
-              </h3>
-
-              <div className="attention-list">
-                <div className="attention-item">
-                  <div className="attention-icon">
-                    💰
-                  </div>
-
-                  <div className="attention-content">
-                    <strong>
-                      Fund distribution
-                    </strong>
-
-                    <small>
-                      Total allocation represented in
-                      the uploaded dataset.
-                    </small>
-                  </div>
-                </div>
-
-                <div className="attention-item">
-                  <div className="attention-icon">
-                    🗺️
-                  </div>
-
-                  <div className="attention-content">
-                    <strong>
-                      Geographic distribution
-                    </strong>
-
-                    <small>
-                      Allocation patterns across states
-                      and constituencies.
-                    </small>
-                  </div>
-                </div>
-
-                <div className="attention-item">
-                  <div className="attention-icon">
-                    👥
-                  </div>
-
-                  <div className="attention-content">
-                    <strong>
-                      MP-level distribution
-                    </strong>
-
-                    <small>
-                      MPs with the highest represented
-                      allocation amounts.
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div className="dashboard-disclaimer">
-            <span>⚠️</span>
-
-            <p>
-              <strong>
-                Allocation analytics notice:
-              </strong>{" "}
-              These metrics describe the uploaded
-              allocation dataset and support monitoring
-              and transparency. Allocation amount alone
-              does not indicate fraud, misuse or
-              wrongdoing.
-            </p>
-          </div>
-        </>
-      )}
     </>
   );
 }
@@ -2726,7 +2042,7 @@ function SettingsPage() {
             [
               "3",
               "AI / Analytics",
-              "Risk detection and allocation analytics",
+              "Risk detection and project analytics",
             ],
             [
               "4",
@@ -2999,11 +2315,10 @@ function AdminPage({
         <p>
           This SIH prototype currently uses
           locally generated/sample project data
-          and uploaded allocation datasets.
-          Production deployment would connect
-          to authorized MPLADS data sources,
-          authentication, role-based access and
-          audit logging.
+          and uploaded datasets. Production
+          deployment would connect to authorized
+          MPLADS data sources, authentication,
+          role-based access and audit logging.
         </p>
       </div>
     </>
@@ -3235,18 +2550,6 @@ function App() {
       DEFAULT_DASHBOARD
     );
 
-  const [
-    allocationAnalytics,
-    setAllocationAnalytics,
-  ] = useState(
-    DEFAULT_ALLOCATION_ANALYTICS
-  );
-
-  const [
-    allocationLoading,
-    setAllocationLoading,
-  ] = useState(false);
-
   const [loading, setLoading] =
     useState(true);
 
@@ -3261,58 +2564,6 @@ function App() {
 
   const [activePage, setActivePage] =
     useState("dashboard");
-
-  /* =======================================================
-     LOAD ALLOCATION ANALYTICS
-     ======================================================= */
-
-  const loadAllocationAnalytics =
-    useCallback(async () => {
-      try {
-        setAllocationLoading(true);
-
-        const response =
-          await axios.get(
-            `${API_BASE_URL}/allocation/analytics`
-          );
-
-        const data =
-          response?.data?.data;
-
-        if (
-          data &&
-          typeof data ===
-            "object"
-        ) {
-          setAllocationAnalytics(
-            {
-              ...DEFAULT_ALLOCATION_ANALYTICS,
-              ...data,
-            }
-          );
-        } else {
-          setAllocationAnalytics(
-            DEFAULT_ALLOCATION_ANALYTICS
-          );
-        }
-      } catch (error) {
-        /*
-          404 is acceptable when no allocation
-          dataset has been uploaded yet.
-        */
-        console.warn(
-          "Allocation analytics unavailable:",
-          error?.response?.data ||
-            error.message
-        );
-
-        setAllocationAnalytics(
-          DEFAULT_ALLOCATION_ANALYTICS
-        );
-      } finally {
-        setAllocationLoading(false);
-      }
-    }, []);
 
   /* =======================================================
      LOAD PROJECT DATA
@@ -3381,18 +2632,9 @@ function App() {
      ======================================================= */
 
   useEffect(() => {
-    const initialize =
-      async () => {
-        await Promise.all([
-          loadData(),
-          loadAllocationAnalytics(),
-        ]);
-      };
-
-    initialize();
+    loadData();
   }, [
     loadData,
-    loadAllocationAnalytics,
   ]);
 
   /* =======================================================
@@ -3408,18 +2650,24 @@ function App() {
               ""
           ).toUpperCase();
 
+        /*
+          Allocation uploads are still supported
+          by the Upload Data page.
+
+          Allocation Analytics page has been removed,
+          so only project uploads refresh the project
+          dashboard.
+        */
+
         if (
-          type ===
+          type !==
           "ALLOCATION"
         ) {
-          await loadAllocationAnalytics();
-        } else {
           await loadData();
         }
       },
       [
         loadData,
-        loadAllocationAnalytics,
       ]
     );
 
@@ -3460,25 +2708,6 @@ function App() {
         <UploadData
           onUploadComplete={
             handleUploadComplete
-          }
-        />
-      );
-    }
-
-    if (
-      activePage ===
-      "allocation"
-    ) {
-      return (
-        <AllocationAnalyticsPage
-          analytics={
-            allocationAnalytics
-          }
-          loading={
-            allocationLoading
-          }
-          refreshAllocation={
-            loadAllocationAnalytics
           }
         />
       );
@@ -3680,20 +2909,6 @@ function App() {
             onClick={() =>
               setActivePage(
                 "map"
-              )
-            }
-          />
-
-          <SidebarItem
-            icon="💰"
-            label="Allocation Analytics"
-            active={
-              activePage ===
-              "allocation"
-            }
-            onClick={() =>
-              setActivePage(
-                "allocation"
               )
             }
           />
