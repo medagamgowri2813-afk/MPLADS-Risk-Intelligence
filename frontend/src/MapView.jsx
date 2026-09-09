@@ -3,7 +3,8 @@ import axios from "axios";
 import India from "@svg-maps/india";
 import "./MapView.css";
 
-const API_URL = "http://localhost:5000/api/works";
+const API_URL =
+  "https://mplads-risk-intelligence.onrender.com/api/works";
 
 const RISK_COLORS = {
   LOW: "#16a34a",
